@@ -69,7 +69,7 @@ public class GameSession implements Serializable {
         isCompleted = completed;
     }
 
-    public boolean isActive() {
+    public boolean getIsActive() {
         return isActive;
     }
 

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GameSessionRepository extends AbstractRepository<GameSession> {
+
     public void save(GameSession gameSession) {
         final String query = """
                 insert into game_session
@@ -26,7 +27,7 @@ public class GameSessionRepository extends AbstractRepository<GameSession> {
                     gameSession.getStartTime().toInstant(ZoneOffset.of("+07:00")))
             );
             statement.setInt(4, gameSession.getIsCompleted() ? 1 : 0);
-            statement.setInt(5, gameSession.isActive() ? 1 : 0);
+            statement.setInt(5, gameSession.getIsActive() ? 1 : 0);
             statement.setString(6, gameSession.getUsername());
 
             return statement.executeUpdate();
@@ -35,7 +36,7 @@ public class GameSessionRepository extends AbstractRepository<GameSession> {
 
     public List<GameSession> findByUsername(String username) {
         final String query = """
-                    select id,  target, start_time, end_time, is_completed, is_active, username
+                    select id, target, start_time, end_time, is_completed, is_active, username
                     from game_session
                     where username = ?
                 """;
@@ -102,12 +103,13 @@ public class GameSessionRepository extends AbstractRepository<GameSession> {
     public void completeGame(String sessionId) {
         final String query = """
                 update game_session
-                set is_completed = 1
+                set is_completed = 1, end_time = ?
                 where id = ?
                 """;
         executeUpdate(connection -> {
             PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(1, sessionId);
+            statement.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
+            statement.setString(2, sessionId);
             return statement.executeUpdate();
         });
     }

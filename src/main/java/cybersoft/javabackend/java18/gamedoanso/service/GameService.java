@@ -3,9 +3,11 @@ package cybersoft.javabackend.java18.gamedoanso.service;
 import cybersoft.javabackend.java18.gamedoanso.model.GameSession;
 import cybersoft.javabackend.java18.gamedoanso.model.Guess;
 import cybersoft.javabackend.java18.gamedoanso.model.Player;
+import cybersoft.javabackend.java18.gamedoanso.model.Ranking;
 import cybersoft.javabackend.java18.gamedoanso.repository.GameSessionRepository;
 import cybersoft.javabackend.java18.gamedoanso.repository.GuessRepository;
 import cybersoft.javabackend.java18.gamedoanso.repository.PlayerRepository;
+import cybersoft.javabackend.java18.gamedoanso.repository.RankRepository;
 
 import java.util.List;
 
@@ -14,11 +16,13 @@ public class GameService {
     private final GameSessionRepository gameSessionRepository;
     private final PlayerRepository playerRepository;
     private final GuessRepository guessRepository;
+    private final RankRepository rankRepository;
 
     private GameService() {
         gameSessionRepository = new GameSessionRepository();
         playerRepository = new PlayerRepository();
         guessRepository = new GuessRepository();
+        rankRepository = new RankRepository();
     }
 
     public static GameService getINSTANCE() {
@@ -83,7 +87,7 @@ public class GameService {
         var activeGame = games.isEmpty()
                 ? createGame(username)
                 : games.stream()
-                .filter(GameSession::isActive)
+                .filter(GameSession::getIsActive)
                 .findFirst()
                 .orElseGet(() -> createGame(username));
 
@@ -92,6 +96,10 @@ public class GameService {
                 .findBySession(activeGame.getId()));
 
         return activeGame;
+    }
+
+    public List<Ranking> getAllRank() {
+        return rankRepository.findAllRank();
     }
 
     public void saveGuess(Guess guess) {
@@ -108,7 +116,52 @@ public class GameService {
         return gameSession;
     }
 
-    public void completeGame(String sessionId) {
-        gameSessionRepository.completeGame(sessionId);
+    public List<GameSession> getGameSessionByUsername(String username) {
+        return gameSessionRepository.findByUsername(username);
+    }
+
+    public void completeGame(GameSession gameSession) {
+        // update game session table
+        gameSessionRepository.completeGame(gameSession.getId());
+
+        // save rank
+        this.saveRank(gameSession.getUsername());
+    }
+
+    public void saveRank(String username) {
+        // get best rank from game session and guess table (db)
+        Ranking bestRank = rankRepository.getBestRank(username);
+
+        // get all rank from ranking table
+        List<Ranking> ranks = rankRepository.findAllRank();
+
+        Ranking currentRank = ranks.stream()
+                .filter(rank -> rank.getUsername().equals(bestRank.getUsername()))
+                .findFirst()
+                .orElse(null);
+
+        if (currentRank != null) {
+            rankRepository.updateRank(bestRank);
+        } else {
+            rankRepository.save(bestRank);
+        }
+    }
+
+    public void changeActiveAndSave(String username, String gameSessionId) {
+        // update in db
+        List<GameSession> gameSessionList =
+                gameSessionRepository.findByUsername(username);
+        GameSession activeGame = gameSessionList.stream()
+                .filter(gameSession -> gameSession.getIsActive() == true).findFirst().orElse(null);
+
+        if (activeGame != null) {
+            activeGame.setActive(false);
+            gameSessionRepository.save(activeGame);
+        }
+
+        GameSession gameSession = gameSessionRepository.findById(gameSessionId);
+        gameSession.setActive(true);
+
+        gameSessionRepository.save(gameSession);
     }
 }
