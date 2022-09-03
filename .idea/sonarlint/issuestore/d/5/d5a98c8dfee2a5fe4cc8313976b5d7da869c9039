@@ -1,0 +1,20 @@
+
+b
+java:S1192."LDefine a constant instead of duplicating this literal "currentUser" 3 times.(Ö¯•û
+€
+java:S1989&"eHandle the following exceptions that could be thrown by "currentGame": ServletException, IOException.(İæ¿Ôıÿÿÿÿ
+}
+java:S1989'"bHandle the following exceptions that could be thrown by "loadGame": ServletException, IOException.(óä™èúÿÿÿÿ
+|
+java:S1989("aHandle the following exceptions that could be thrown by "ranking": ServletException, IOException.(¢¤Ë¼úÿÿÿÿ
+i
+java:S1989)"SHandle the following exception that could be thrown by "sendRedirect": IOException.(¼ïç
+P	java:S125F"<This block of commented-out lines of code should be removed.(™šå*
+m
+java:S1989T"RHandle the following exception that could be thrown by "processGame": IOException.(ëü¿ÿÿÿÿÿ
+k
+java:S1989U"UHandle the following exception that could be thrown by "processNewGame": IOException.(ÜîæÙ
+|
+java:S1989W"aHandle the following exceptions that could be thrown by "forward": ServletException, IOException.(ßŸÜ›úÿÿÿÿ
+i
+java:S1989X"SHandle the following exception that could be thrown by "sendRedirect": IOException.(¼ïç
